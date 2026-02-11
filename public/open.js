@@ -102,14 +102,16 @@
       name: 'Claude Code',
       desc: 'Anthropic CLI',
       icon: '>_',
-      shortCmd: 'pbpaste | claude -p',
+      buildCommand: (prompt) =>
+        `claude -p <<'PROMPT'\n${prompt}\nPROMPT`,
     },
     {
       id: 'codex',
       name: 'Codex CLI',
       desc: 'OpenAI CLI',
       icon: '>_',
-      shortCmd: 'pbpaste | codex',
+      buildCommand: (prompt) =>
+        `codex <<'PROMPT'\n${prompt}\nPROMPT`,
     },
   ];
 
@@ -157,25 +159,24 @@
     TERMINAL_AGENTS.forEach(agent => {
       const btn = document.createElement('button');
       btn.className = 'terminal-btn';
+      const command = agent.buildCommand(promptContent);
       btn.innerHTML = `
         <div class="term-icon">${agent.icon}</div>
         <div>
           <div class="ai-name">${agent.name}</div>
           <div class="ai-desc">${agent.desc}</div>
-          <div class="term-cmd">${agent.shortCmd}</div>
         </div>
-        <span class="copy-label">copy</span>
+        <span class="copy-label">copy command</span>
       `;
       btn.addEventListener('click', () => {
-        // Copy prompt to clipboard, show the short pipe command
-        navigator.clipboard.writeText(promptContent);
+        navigator.clipboard.writeText(command);
         btn.classList.add('copied');
         btn.querySelector('.copy-label').textContent = 'copied!';
-        showToast('Instructions copied. Run: ' + agent.shortCmd);
+        showToast('Command copied — paste in your terminal');
         setTimeout(() => {
           btn.classList.remove('copied');
-          btn.querySelector('.copy-label').textContent = 'copy';
-        }, 3000);
+          btn.querySelector('.copy-label').textContent = 'copy command';
+        }, 2500);
       });
       termContainer.appendChild(btn);
     });
