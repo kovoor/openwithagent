@@ -125,6 +125,33 @@
     }
   }
 
+  function getFilename(tool) {
+    switch (tool) {
+      case 'claude': return 'run-with-claude.command';
+      case 'cursor': return 'run-with-cursor.command';
+      case 'codex': return 'run-with-codex.command';
+      default: return null;
+    }
+  }
+
+  // Download a .command file that opens in Terminal on macOS
+  function downloadCommand(tool) {
+    const cmd = generateCommand(tool);
+    const filename = getFilename(tool);
+    if (!filename) return;
+
+    const script = '#!/bin/bash\n' + cmd + '\n';
+    const blob = new Blob([script], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   // Expose to global scope for onclick handlers
   window.copyForTool = function (tool) {
     const cmd = generateCommand(tool);
@@ -133,8 +160,18 @@
     document.getElementById('command-label').textContent = getLabel(tool);
     document.getElementById('command-output').textContent = cmd;
 
+    // Copy to clipboard
     navigator.clipboard.writeText(cmd);
-    showToast('Copied to clipboard');
+
+    // For CLI tools, also download a .command file
+    if (tool !== 'raw') {
+      downloadCommand(tool);
+      document.getElementById('run-hint').style.display = '';
+      showToast('Downloaded & copied to clipboard');
+    } else {
+      document.getElementById('run-hint').style.display = 'none';
+      showToast('Copied to clipboard');
+    }
 
     // Highlight selected tool
     document.querySelectorAll('.tool-btn').forEach(btn => {

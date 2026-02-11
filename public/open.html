@@ -44,21 +44,21 @@
           <span class="tool-icon">&#9641;</span>
           <div>
             <div class="tool-name">Claude Code</div>
-            <div class="tool-desc">Copy terminal command</div>
+            <div class="tool-desc">Download &amp; copy command</div>
           </div>
         </button>
         <button class="tool-btn" onclick="copyForTool('cursor')">
           <span class="tool-icon">&#9998;</span>
           <div>
             <div class="tool-name">Cursor</div>
-            <div class="tool-desc">Copy terminal command</div>
+            <div class="tool-desc">Download &amp; copy command</div>
           </div>
         </button>
         <button class="tool-btn" onclick="copyForTool('codex')">
           <span class="tool-icon">&#9881;</span>
           <div>
             <div class="tool-name">OpenAI Codex</div>
-            <div class="tool-desc">Copy terminal command</div>
+            <div class="tool-desc">Download &amp; copy command</div>
           </div>
         </button>
         <button class="tool-btn" onclick="copyForTool('raw')">
@@ -68,6 +68,11 @@
             <div class="tool-desc">Paste into any AI tool</div>
           </div>
         </button>
+      </div>
+
+      <!-- Run instructions -->
+      <div id="run-hint" style="display:none;margin-top:.75rem;padding:.6rem .85rem;background:var(--bg-muted);border:1px solid var(--border);border-radius:8px;font-size:.8125rem;color:var(--fg-muted)">
+        <strong style="color:var(--fg)">Next:</strong> Open the downloaded <code>.command</code> file to run it in Terminal. Or paste (<kbd style="background:var(--bg-hover);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:.75rem">&#8984;V</kbd>) the copied command into your terminal.
       </div>
 
       <!-- Command preview -->
