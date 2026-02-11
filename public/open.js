@@ -100,21 +100,20 @@
     {
       id: 'claude-code',
       name: 'Claude Code',
-      desc: 'Anthropic CLI',
+      desc: 'Anthropic CLI — paste in terminal',
       icon: '>_',
       buildCommand: (prompt) => `claude -p ${shellQuote(prompt)}`,
     },
     {
       id: 'codex',
       name: 'Codex CLI',
-      desc: 'OpenAI CLI',
+      desc: 'OpenAI CLI — paste in terminal',
       icon: '>_',
       buildCommand: (prompt) => `codex ${shellQuote(prompt)}`,
     },
   ];
 
   function shellQuote(str) {
-    // Use $'...' syntax for safe shell quoting
     return "$'" + str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n') + "'";
   }
 
@@ -175,7 +174,7 @@
         navigator.clipboard.writeText(command);
         btn.classList.add('copied');
         btn.querySelector('.copy-label').textContent = 'copied!';
-        showToast('Command copied to clipboard');
+        showToast('Paste this command in your terminal');
         setTimeout(() => {
           btn.classList.remove('copied');
           btn.querySelector('.copy-label').textContent = 'copy command';
