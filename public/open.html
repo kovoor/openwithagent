@@ -74,6 +74,10 @@
     }
     .terminal-btn .ai-name{font-weight:700;font-size:var(--text-base);color:var(--fg)}
     .terminal-btn .ai-desc{color:var(--fg-dim);font-size:var(--text-sm);margin-top:1px}
+    .terminal-btn .term-cmd{
+      font-size:var(--text-xs);color:var(--fg-dim);margin-top:4px;
+      font-family:var(--font);opacity:.7;
+    }
     .terminal-btn .copy-label{
       color:var(--fg-dim);font-size:var(--text-xs);
       margin-left:auto;flex-shrink:0;
@@ -121,6 +125,7 @@
       </div>
 
       <div class="section-divider">Terminal-based agents</div>
+      <p style="font-size:var(--text-xs);color:var(--fg-dim);margin-bottom:.5rem">Click to copy instructions, then paste the short command in your terminal.</p>
       <div class="ai-stack" id="terminal-buttons">
         <!-- Terminal agent buttons injected by JS -->
       </div>

@@ -100,22 +100,18 @@
     {
       id: 'claude-code',
       name: 'Claude Code',
-      desc: 'Anthropic CLI — paste in terminal',
+      desc: 'Anthropic CLI',
       icon: '>_',
-      buildCommand: (prompt) => `claude -p ${shellQuote(prompt)}`,
+      shortCmd: 'pbpaste | claude -p',
     },
     {
       id: 'codex',
       name: 'Codex CLI',
-      desc: 'OpenAI CLI — paste in terminal',
+      desc: 'OpenAI CLI',
       icon: '>_',
-      buildCommand: (prompt) => `codex ${shellQuote(prompt)}`,
+      shortCmd: 'pbpaste | codex',
     },
   ];
-
-  function shellQuote(str) {
-    return "$'" + str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n') + "'";
-  }
 
   function showReady() {
     document.getElementById('status').style.display = 'none';
@@ -159,7 +155,6 @@
     termContainer.innerHTML = '';
 
     TERMINAL_AGENTS.forEach(agent => {
-      const command = agent.buildCommand(promptContent);
       const btn = document.createElement('button');
       btn.className = 'terminal-btn';
       btn.innerHTML = `
@@ -167,18 +162,20 @@
         <div>
           <div class="ai-name">${agent.name}</div>
           <div class="ai-desc">${agent.desc}</div>
+          <div class="term-cmd">${agent.shortCmd}</div>
         </div>
-        <span class="copy-label">copy command</span>
+        <span class="copy-label">copy</span>
       `;
       btn.addEventListener('click', () => {
-        navigator.clipboard.writeText(command);
+        // Copy prompt to clipboard, show the short pipe command
+        navigator.clipboard.writeText(promptContent);
         btn.classList.add('copied');
         btn.querySelector('.copy-label').textContent = 'copied!';
-        showToast('Paste this command in your terminal');
+        showToast('Instructions copied. Run: ' + agent.shortCmd);
         setTimeout(() => {
           btn.classList.remove('copied');
-          btn.querySelector('.copy-label').textContent = 'copy command';
-        }, 2000);
+          btn.querySelector('.copy-label').textContent = 'copy';
+        }, 3000);
       });
       termContainer.appendChild(btn);
     });
