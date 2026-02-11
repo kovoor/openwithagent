@@ -1,18 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="220" height="40" viewBox="0 0 220 40">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#f8f8f7"/>
-    </linearGradient>
-    <linearGradient id="star-fill" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#8a7560"/>
-      <stop offset="100%" stop-color="#6b5a48"/>
-    </linearGradient>
-  </defs>
-  <rect x="0.5" y="0.5" width="219" height="39" rx="10" fill="url(#bg)" stroke="#d4d4d4" stroke-width="1"/>
-  <g transform="translate(18, 10)">
-    <path d="M8 0L10.1 5.5L16 7.5L10.1 9.5L8 15L5.9 9.5L0 7.5L5.9 5.5Z" fill="url(#star-fill)" opacity="0.85"/>
-    <path d="M14.5 0.5L15.3 2.5L17.5 3L15.3 3.5L14.5 5.5L13.7 3.5L11.5 3L13.7 2.5Z" fill="#6b5a48" opacity="0.3"/>
-  </g>
-  <text x="44" y="25.5" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,monospace" font-size="14.5" font-weight="600" fill="#1a1a1a" letter-spacing="0.2">Open with Agent</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="40" viewBox="0 0 220 40"><defs><linearGradient id="bg" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#f8f8f7"/></linearGradient><linearGradient id="star-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#8a7560"/><stop offset="100%" stop-color="#6b5a48"/></linearGradient></defs><rect width="219" height="39" x=".5" y=".5" fill="url(#bg)" stroke="#d4d4d4" stroke-width="1" rx="10"/><g><path fill="url(#star-fill)" d="M8 0L10.1 5.5L16 7.5L10.1 9.5L8 15L5.9 9.5L0 7.5L5.9 5.5Z" opacity=".85" transform="translate(18, 10)"/><path fill="#6b5a48" d="M14.5 0.5L15.3 2.5L17.5 3L15.3 3.5L14.5 5.5L13.7 3.5L11.5 3L13.7 2.5Z" opacity=".3" transform="translate(18, 10)"/></g><text x="44" y="25.5" fill="#1a1a1a" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,monospace" font-size="14.5" font-weight="600" letter-spacing=".2">Open with Agent</text></svg>
