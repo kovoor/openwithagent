@@ -1,4 +1,5 @@
 // open.js — tool picker logic for OpenWithAgent
+// Every button is a direct link. Click → app opens with prompt. No copy-paste.
 (function () {
   let promptContent = '';
   let repoName = '';
@@ -67,6 +68,44 @@
     );
   }
 
+  // --- AI platforms with universal link support ---
+  // Each platform gets a URL that opens with the prompt pre-filled via query param.
+
+  const AI_PLATFORMS = [
+    {
+      id: 'chatgpt',
+      name: 'ChatGPT',
+      desc: 'by OpenAI',
+      iconClass: 'icon-chatgpt',
+      icon: 'G',
+      buildUrl: (prompt) => 'https://chatgpt.com/?q=' + encodeURIComponent(prompt),
+    },
+    {
+      id: 'claude',
+      name: 'Claude',
+      desc: 'by Anthropic',
+      iconClass: 'icon-claude',
+      icon: 'C',
+      buildUrl: (prompt) => 'https://claude.ai/new?q=' + encodeURIComponent(prompt),
+    },
+    {
+      id: 'gemini',
+      name: 'Gemini',
+      desc: 'by Google',
+      iconClass: 'icon-gemini',
+      icon: 'G',
+      buildUrl: (prompt) => 'https://gemini.google.com/app?q=' + encodeURIComponent(prompt),
+    },
+    {
+      id: 'copilot',
+      name: 'Copilot',
+      desc: 'by Microsoft',
+      iconClass: 'icon-copilot',
+      icon: 'C',
+      buildUrl: (prompt) => 'https://copilot.microsoft.com/?q=' + encodeURIComponent(prompt),
+    },
+  ];
+
   function showReady() {
     document.getElementById('status').style.display = 'none';
     document.getElementById('main').style.display = '';
@@ -81,75 +120,34 @@
     }
 
     document.getElementById('prompt-content').textContent = promptContent;
+
+    // Build the AI platform buttons as direct links
+    const container = document.getElementById('ai-buttons');
+    container.innerHTML = '';
+
+    AI_PLATFORMS.forEach(platform => {
+      const url = platform.buildUrl(promptContent);
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.className = 'ai-btn';
+      a.innerHTML = `
+        <div class="ai-icon ${platform.iconClass}">${platform.icon}</div>
+        <div>
+          <div class="ai-name">${platform.name}</div>
+          <div class="ai-desc">${platform.desc}</div>
+        </div>
+        <span class="ai-arrow">&#8250;</span>
+      `;
+      container.appendChild(a);
+    });
   }
 
   function showError(msg) {
     document.getElementById('status').style.display = 'none';
     document.getElementById('error-state').style.display = '';
     document.getElementById('error-detail').textContent = msg;
-  }
-
-  function showStatus(html, type) {
-    const el = document.getElementById('launch-status');
-    el.innerHTML = html;
-    el.style.display = '';
-    el.style.background = type === 'success' ? 'rgba(34,197,94,.08)' : 'var(--bg-muted)';
-    el.style.border = type === 'success' ? '1px solid rgba(34,197,94,.2)' : '1px solid var(--border)';
-    el.style.color = type === 'success' ? '#16a34a' : 'var(--fg-muted)';
-  }
-
-  // --- Launch handlers ---
-
-  window.launchTool = function (toolId) {
-    // Always copy prompt to clipboard
-    navigator.clipboard.writeText(promptContent);
-
-    // Highlight selected button
-    document.querySelectorAll('.launch-btn, .tool-btn').forEach(btn => btn.classList.remove('selected'));
-    event.currentTarget.classList.add('selected');
-
-    switch (toolId) {
-      case 'chatgpt':
-        // ChatGPT supports ?q= — prompt is pre-filled automatically
-        window.open('https://chatgpt.com/?q=' + encodeURIComponent(promptContent), '_blank');
-        showStatus('&#10003; ChatGPT opened with your prompt pre-filled. Check the new tab.', 'success');
-        showToast('Prompt sent to ChatGPT');
-        break;
-
-      case 'claude-app':
-        // Claude.ai doesn't support URL params — open + clipboard
-        window.open('https://claude.ai/new', '_blank');
-        showStatus('&#10003; Claude opened in a new tab. <strong>Paste</strong> (&#8984;V) and <strong>send</strong> — your prompt is ready in the clipboard.', 'info');
-        showToast('Claude opened — paste & send');
-        break;
-
-      case 'claude-code':
-        clipboardCli(`claude -p '${esc(promptContent)}'`);
-        break;
-
-      case 'cursor':
-        clipboardCli(`cursor --prompt '${esc(promptContent)}'`);
-        break;
-
-      case 'codex':
-        clipboardCli(`codex '${esc(promptContent)}'`);
-        break;
-
-      case 'raw':
-        showStatus('&#10003; Prompt copied to clipboard. Paste it into any AI tool.', 'success');
-        showToast('Copied to clipboard');
-        break;
-    }
-  };
-
-  function esc(text) {
-    return text.replace(/'/g, "'\\''");
-  }
-
-  function clipboardCli(cmd) {
-    navigator.clipboard.writeText(cmd);
-    showStatus('&#10003; Command copied. Open your terminal and <strong>paste</strong> (&#8984;V) to run it.', 'info');
-    showToast('Command copied');
   }
 
   function showToast(msg) {
