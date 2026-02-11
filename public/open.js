@@ -95,18 +95,21 @@
       name: 'Claude Code',
       desc: 'Anthropic CLI',
       icon: '>_',
-      buildCommand: (prompt) =>
-        `claude -p <<'PROMPT'\n${prompt}\nPROMPT\n`,
+      bin: 'claude -p',
     },
     {
       id: 'codex',
       name: 'Codex CLI',
       desc: 'OpenAI CLI',
       icon: '>_',
-      buildCommand: (prompt) =>
-        `codex <<'PROMPT'\n${prompt}\nPROMPT\n`,
+      bin: 'codex',
     },
   ];
+
+  function buildTerminalCommand(bin, prompt) {
+    const b64 = btoa(unescape(encodeURIComponent(prompt)));
+    return `echo '${b64}' | base64 -d | ${bin}`;
+  }
 
   function showReady() {
     document.getElementById('status').style.display = 'none';
@@ -152,7 +155,7 @@
     TERMINAL_AGENTS.forEach(agent => {
       const btn = document.createElement('button');
       btn.className = 'terminal-btn';
-      const command = agent.buildCommand(promptContent);
+      const command = buildTerminalCommand(agent.bin, promptContent);
       btn.innerHTML = `
         <div class="term-icon">${agent.icon}</div>
         <div>
