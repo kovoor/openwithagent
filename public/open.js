@@ -9,8 +9,6 @@
   const repoParam = params.get('repo');
 
   if (promptParam) {
-    // Instructions encoded directly in URL (base64)
-    // Strip trailing non-base64 chars (e.g. ")" from markdown link syntax)
     const cleaned = promptParam.replace(/[^A-Za-z0-9+/=]+$/, '');
     try {
       promptContent = decodeURIComponent(escape(atob(cleaned)));
@@ -19,7 +17,6 @@
       showError('Invalid prompt encoding. The link may be malformed.');
     }
   } else if (repoParam) {
-    // Fetch .openwithagent.md from GitHub, fallback to README.md
     repoName = repoParam;
     fetchFromRepo(repoParam);
   } else {
@@ -29,7 +26,6 @@
   async function fetchFromRepo(repo) {
     const branches = ['main', 'master'];
 
-    // Try .openwithagent.md first
     for (const branch of branches) {
       try {
         const url = `https://raw.githubusercontent.com/${repo}/${branch}/.openwithagent.md`;
@@ -39,12 +35,9 @@
           showReady();
           return;
         }
-      } catch (e) {
-        // try next branch
-      }
+      } catch (e) {}
     }
 
-    // Fallback: fetch README.md and wrap with setup context
     for (const branch of branches) {
       try {
         const url = `https://raw.githubusercontent.com/${repo}/${branch}/README.md`;
@@ -65,9 +58,7 @@
           showReady();
           return;
         }
-      } catch (e) {
-        // try next branch
-      }
+      } catch (e) {}
     }
 
     showError(
@@ -100,18 +91,12 @@
 
   function generateCommand(tool) {
     const escaped = promptContent.replace(/'/g, "'\\''");
-
     switch (tool) {
-      case 'claude':
-        return `claude -p '${escaped}'`;
-      case 'cursor':
-        return `cursor --prompt '${escaped}'`;
-      case 'codex':
-        return `codex '${escaped}'`;
-      case 'raw':
-        return promptContent;
-      default:
-        return promptContent;
+      case 'claude': return `claude -p '${escaped}'`;
+      case 'cursor': return `cursor --prompt '${escaped}'`;
+      case 'codex': return `codex '${escaped}'`;
+      case 'raw': return promptContent;
+      default: return promptContent;
     }
   }
 
@@ -125,19 +110,47 @@
     }
   }
 
-  function getFilename(tool) {
+  // --- Deep link / URL scheme support ---
+
+  // Try to open an app via its registered URL scheme.
+  // Uses a hidden iframe so the browser doesn't show an error if the scheme isn't registered.
+  function tryDeepLink(url) {
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = url;
+    document.body.appendChild(iframe);
+    setTimeout(() => {
+      try { document.body.removeChild(iframe); } catch (e) {}
+    }, 2000);
+  }
+
+  // Build deep link URLs to try for the tool.
+  // Hidden iframe approach fails silently if scheme isn't registered — zero downside.
+  function getDeepLinks(tool) {
     switch (tool) {
-      case 'claude': return 'run-with-claude.command';
-      case 'cursor': return 'run-with-cursor.command';
-      case 'codex': return 'run-with-codex.command';
-      default: return null;
+      case 'claude':
+        // Try Claude desktop app and Claude Code
+        return ['claude://'];
+      case 'cursor':
+        // Cursor registers cursor:// (VS Code fork)
+        return ['cursor://'];
+      case 'codex':
+        // Try OpenAI ChatGPT desktop app
+        return ['chatgpt://'];
+      default:
+        return [];
     }
   }
 
-  // Download a .command file that opens in Terminal on macOS
-  function downloadCommand(tool) {
+  // Download a .command file (macOS: double-click opens Terminal and runs it)
+  function downloadCommandFile(tool) {
     const cmd = generateCommand(tool);
-    const filename = getFilename(tool);
+    const names = {
+      claude: 'run-with-claude.command',
+      cursor: 'run-with-cursor.command',
+      codex: 'run-with-codex.command',
+    };
+    const filename = names[tool];
     if (!filename) return;
 
     const script = '#!/bin/bash\n' + cmd + '\n';
@@ -152,32 +165,45 @@
     URL.revokeObjectURL(url);
   }
 
-  // Expose to global scope for onclick handlers
+  // --- Main handler ---
+
   window.copyForTool = function (tool) {
     const cmd = generateCommand(tool);
+
+    // Always show command preview
     const section = document.getElementById('command-section');
     section.style.display = '';
     document.getElementById('command-label').textContent = getLabel(tool);
     document.getElementById('command-output').textContent = cmd;
 
-    // Copy to clipboard
+    // Always copy to clipboard
     navigator.clipboard.writeText(cmd);
 
-    // For CLI tools, also download a .command file
-    if (tool !== 'raw') {
-      downloadCommand(tool);
-      document.getElementById('run-hint').style.display = '';
-      showToast('Downloaded & copied to clipboard');
-    } else {
+    // Highlight selected tool
+    document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('selected'));
+    event.currentTarget.classList.add('selected');
+
+    if (tool === 'raw') {
       document.getElementById('run-hint').style.display = 'none';
       showToast('Copied to clipboard');
+      return;
     }
 
-    // Highlight selected tool
-    document.querySelectorAll('.tool-btn').forEach(btn => {
-      btn.classList.remove('selected');
-    });
-    event.currentTarget.classList.add('selected');
+    // Try deep links (opens the app if installed, fails silently if not)
+    const deepLinks = getDeepLinks(tool);
+    deepLinks.forEach(link => tryDeepLink(link));
+
+    // Download .command file for terminal-based tools
+    downloadCommandFile(tool);
+
+    // Show next-step hint
+    document.getElementById('run-hint').style.display = '';
+
+    if (deepLinks.length > 0) {
+      showToast('Opening app — command also copied');
+    } else {
+      showToast('Downloaded & copied to clipboard');
+    }
   };
 
   window.copyCommand = function () {
