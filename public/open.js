@@ -85,13 +85,6 @@
       logo: '/logo-claude.png',
       buildUrl: (prompt) => 'https://claude.ai/new?q=' + encodeURIComponent(prompt),
     },
-    {
-      id: 'gemini',
-      name: 'Gemini',
-      desc: 'by Google',
-      logo: '/logo-gemini.png',
-      buildUrl: (prompt) => 'https://gemini.google.com/app?q=' + encodeURIComponent(prompt),
-    },
   ];
 
   // --- Terminal-based agents (copy command to clipboard) ---
