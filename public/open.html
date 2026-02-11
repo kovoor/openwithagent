@@ -7,6 +7,54 @@
   <meta name="description" content="Pick your AI coding assistant and get started.">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="/style.css">
+  <style>
+    .launch-btn{
+      display:flex;align-items:center;gap:1rem;
+      width:100%;padding:1.1rem 1.25rem;
+      background:var(--bg);
+      border:1px solid var(--border);
+      border-radius:12px;
+      cursor:pointer;text-align:left;
+      font-family:var(--font);
+      transition:all .25s;
+      position:relative;
+    }
+    .launch-btn:hover{
+      border-color:var(--border-hover);
+      box-shadow:0 2px 12px rgba(0,0,0,.06);
+      transform:translateY(-1px);
+    }
+    .launch-btn .icon{font-size:1.5rem;flex-shrink:0;width:36px;text-align:center}
+    .launch-btn .info{flex:1}
+    .launch-btn .name{font-weight:700;font-size:var(--text-base);color:var(--fg)}
+    .launch-btn .desc{color:var(--fg-muted);font-size:var(--text-sm);margin-top:2px}
+    .launch-btn .badge-auto{
+      display:inline-block;
+      background:#22c55e;color:#fff;
+      font-size:.6875rem;font-weight:700;
+      padding:2px 8px;border-radius:99px;
+      letter-spacing:.03em;
+    }
+    .launch-btn .badge-paste{
+      display:inline-block;
+      background:var(--bg-muted);color:var(--fg-dim);
+      font-size:.6875rem;font-weight:600;
+      padding:2px 8px;border-radius:99px;
+      border:1px solid var(--border);
+    }
+    .launch-btn.selected{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+    .launch-stack{display:flex;flex-direction:column;gap:.625rem;margin:1rem 0}
+    .cli-toggle{
+      display:flex;align-items:center;gap:.4rem;
+      background:none;border:none;cursor:pointer;
+      font-family:var(--font);font-size:var(--text-sm);
+      color:var(--fg-dim);padding:.5rem 0;
+      transition:color .2s;
+    }
+    .cli-toggle:hover{color:var(--fg-muted)}
+    .cli-toggle .arrow{transition:transform .2s;display:inline-block}
+    .cli-toggle .arrow.open{transform:rotate(90deg)}
+  </style>
 </head>
 <body>
   <nav>
@@ -25,7 +73,7 @@
       Loading instructions...
     </div>
 
-    <!-- Main content (hidden until loaded) -->
+    <!-- Main content -->
     <div id="main" style="display:none">
       <!-- Repo info -->
       <div id="repo-info" style="margin-bottom:.25rem;display:none">
@@ -37,70 +85,71 @@
         No <code>.openwithagent.md</code> found &mdash; using the README as context instead.
       </div>
 
-      <div class="section-label" style="margin-top:1.5rem">Pick your AI tool</div>
+      <div class="section-label" style="margin-top:1.5rem">Choose your AI assistant</div>
 
-      <div class="tool-grid">
-        <button class="tool-btn" onclick="copyForTool('claude-code')">
-          <span class="tool-icon">&#9641;</span>
-          <div>
-            <div class="tool-name">Claude Code</div>
-            <div class="tool-desc">Runs in Terminal</div>
+      <div class="launch-stack">
+        <!-- ChatGPT — fully automatic -->
+        <button class="launch-btn" onclick="launchTool('chatgpt')">
+          <span class="icon">&#9673;</span>
+          <div class="info">
+            <div class="name">ChatGPT <span class="badge-auto">auto</span></div>
+            <div class="desc">Opens ChatGPT with your prompt pre-filled</div>
           </div>
         </button>
-        <button class="tool-btn" onclick="copyForTool('claude-app')">
-          <span class="tool-icon">&#10038;</span>
-          <div>
-            <div class="tool-name">Claude App</div>
-            <div class="tool-desc">Opens &amp; paste prompt</div>
-          </div>
-        </button>
-        <button class="tool-btn" onclick="copyForTool('cursor')">
-          <span class="tool-icon">&#9998;</span>
-          <div>
-            <div class="tool-name">Cursor</div>
-            <div class="tool-desc">Runs in Terminal</div>
-          </div>
-        </button>
-        <button class="tool-btn" onclick="copyForTool('chatgpt')">
-          <span class="tool-icon">&#9673;</span>
-          <div>
-            <div class="tool-name">ChatGPT</div>
-            <div class="tool-desc">Opens with prompt</div>
-          </div>
-        </button>
-        <button class="tool-btn" onclick="copyForTool('codex')">
-          <span class="tool-icon">&#9881;</span>
-          <div>
-            <div class="tool-name">Codex CLI</div>
-            <div class="tool-desc">Runs in Terminal</div>
-          </div>
-        </button>
-        <button class="tool-btn" onclick="copyForTool('raw')">
-          <span class="tool-icon">&#9776;</span>
-          <div>
-            <div class="tool-name">Copy prompt</div>
-            <div class="tool-desc">Paste anywhere</div>
+
+        <!-- Claude App — opens + paste -->
+        <button class="launch-btn" onclick="launchTool('claude-app')">
+          <span class="icon">&#10038;</span>
+          <div class="info">
+            <div class="name">Claude <span class="badge-paste">paste</span></div>
+            <div class="desc">Opens claude.ai &mdash; prompt copied, just paste and send</div>
           </div>
         </button>
       </div>
 
-      <!-- Run instructions -->
-      <div id="run-hint" style="display:none;margin-top:.75rem;padding:.6rem .85rem;background:var(--bg-muted);border:1px solid var(--border);border-radius:8px;font-size:.8125rem;color:var(--fg-muted)">
-        <strong style="color:var(--fg)">Next:</strong> Open the downloaded <code>.command</code> file to run it in Terminal. Or paste (<kbd style="background:var(--bg-hover);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:.75rem">&#8984;V</kbd>) the copied command into your terminal.
-      </div>
+      <!-- Status message after clicking -->
+      <div id="launch-status" style="display:none;margin:.75rem 0;padding:.75rem 1rem;border-radius:10px;font-size:var(--text-sm)"></div>
 
-      <!-- Command preview -->
-      <div id="command-section" style="display:none;margin-top:1rem">
-        <label id="command-label">Command</label>
-        <div class="output-block" style="min-height:52px;align-items:flex-start;padding:.75rem">
-          <code id="command-output" style="white-space:pre-wrap"></code>
-          <button class="btn btn-ghost copy-btn" onclick="copyCommand()" title="Copy">copy</button>
+      <!-- CLI tools (collapsed by default) -->
+      <button class="cli-toggle" onclick="toggleCli()">
+        <span class="arrow" id="cli-arrow">&#9654;</span> Developer tools (CLI)
+      </button>
+      <div id="cli-section" style="display:none">
+        <div class="tool-grid" style="margin-top:.5rem">
+          <button class="tool-btn" onclick="launchTool('claude-code')">
+            <span class="tool-icon">&#9641;</span>
+            <div>
+              <div class="tool-name">Claude Code</div>
+              <div class="tool-desc">Terminal</div>
+            </div>
+          </button>
+          <button class="tool-btn" onclick="launchTool('cursor')">
+            <span class="tool-icon">&#9998;</span>
+            <div>
+              <div class="tool-name">Cursor</div>
+              <div class="tool-desc">Terminal</div>
+            </div>
+          </button>
+          <button class="tool-btn" onclick="launchTool('codex')">
+            <span class="tool-icon">&#9881;</span>
+            <div>
+              <div class="tool-name">Codex CLI</div>
+              <div class="tool-desc">Terminal</div>
+            </div>
+          </button>
+          <button class="tool-btn" onclick="launchTool('raw')">
+            <span class="tool-icon">&#9776;</span>
+            <div>
+              <div class="tool-name">Copy prompt</div>
+              <div class="tool-desc">Clipboard</div>
+            </div>
+          </button>
         </div>
       </div>
 
       <!-- Instructions preview -->
-      <details style="margin-top:1.25rem">
-        <summary style="cursor:pointer;color:var(--fg-muted);font-size:.8125rem;font-weight:500">View raw instructions</summary>
+      <details style="margin-top:1.5rem">
+        <summary style="cursor:pointer;color:var(--fg-dim);font-size:.8125rem;font-weight:500">View instructions</summary>
         <div class="prompt-preview" style="margin-top:.5rem">
           <pre id="prompt-content"></pre>
         </div>
@@ -127,6 +176,15 @@
 
   <div class="toast" id="toast"></div>
 
+  <script>
+    function toggleCli() {
+      const s = document.getElementById('cli-section');
+      const a = document.getElementById('cli-arrow');
+      const open = s.style.display === 'none';
+      s.style.display = open ? '' : 'none';
+      a.classList.toggle('open', open);
+    }
+  </script>
   <script src="/open.js"></script>
 </body>
 </html>
