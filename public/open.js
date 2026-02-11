@@ -89,57 +89,92 @@
     document.getElementById('error-detail').textContent = msg;
   }
 
-  // --- Tool definitions ---
+  // --- Script generators ---
+  // Each tool gets a .command script that auto-launches and sends the prompt.
+  // macOS: .command files open in Terminal when double-clicked.
 
-  const TOOLS = {
-    'claude-code': {
-      label: 'Claude Code command',
-      type: 'cli',
-      command: () => {
-        const escaped = promptContent.replace(/'/g, "'\\''");
-        return `claude -p '${escaped}'`;
-      },
-      filename: 'run-with-claude-code.command',
-    },
-    'claude-app': {
-      label: 'Claude App',
-      type: 'app',
-      url: 'https://claude.ai/new',
-    },
-    'cursor': {
-      label: 'Cursor command',
-      type: 'cli',
-      command: () => {
-        const escaped = promptContent.replace(/'/g, "'\\''");
-        return `cursor --prompt '${escaped}'`;
-      },
-      filename: 'run-with-cursor.command',
-      deepLink: 'cursor://',
-    },
-    'chatgpt': {
-      label: 'ChatGPT',
-      type: 'app',
-      url: 'https://chatgpt.com',
-    },
-    'codex': {
-      label: 'Codex command',
-      type: 'cli',
-      command: () => {
-        const escaped = promptContent.replace(/'/g, "'\\''");
-        return `codex '${escaped}'`;
-      },
-      filename: 'run-with-codex.command',
-    },
-    'raw': {
-      label: 'Raw instructions',
-      type: 'copy',
-    },
-  };
+  function escapeShellArg(text) {
+    // Escape single quotes for shell
+    return text.replace(/'/g, "'\\''");
+  }
 
-  // Download a .command file (macOS: double-click opens Terminal)
-  function downloadCommandFile(cmd, filename) {
-    const script = '#!/bin/bash\n' + cmd + '\n';
-    const blob = new Blob([script], { type: 'application/octet-stream' });
+  function escapeAppleScript(text) {
+    // Escape backslashes and double quotes for AppleScript strings
+    return text.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  }
+
+  function generateScript(toolId) {
+    const escaped = escapeShellArg(promptContent);
+    const asEscaped = escapeAppleScript(promptContent);
+
+    switch (toolId) {
+      case 'claude-code':
+        // Runs claude CLI directly in Terminal
+        return `#!/bin/bash\nclaude -p '${escaped}'\n`;
+
+      case 'claude-app':
+        // Opens Claude desktop app, pastes prompt via AppleScript, sends it
+        return [
+          '#!/bin/bash',
+          '# Put prompt in clipboard',
+          `printf '%s' '${escaped}' | pbcopy`,
+          '# Open Claude app',
+          'open -a "Claude" 2>/dev/null || open "https://claude.ai/new"',
+          '# Wait for app to activate, then paste and send',
+          'sleep 2',
+          'osascript -e \'tell application "System Events" to keystroke "v" using command down\'',
+          'sleep 0.3',
+          'osascript -e \'tell application "System Events" to keystroke return\'',
+          '',
+        ].join('\n');
+
+      case 'cursor':
+        // Runs cursor CLI
+        return `#!/bin/bash\ncursor --prompt '${escaped}'\n`;
+
+      case 'chatgpt':
+        // Opens ChatGPT with ?q= pre-filled (no paste needed)
+        return [
+          '#!/bin/bash',
+          `open "https://chatgpt.com/?q=${encodeURIComponent(promptContent)}"`,
+          '',
+        ].join('\n');
+
+      case 'codex':
+        // Runs codex CLI
+        return `#!/bin/bash\ncodex '${escaped}'\n`;
+
+      default:
+        return null;
+    }
+  }
+
+  function getFilename(toolId) {
+    const names = {
+      'claude-code': 'run-with-claude-code.command',
+      'claude-app': 'run-with-claude-app.command',
+      'cursor': 'run-with-cursor.command',
+      'chatgpt': 'run-with-chatgpt.command',
+      'codex': 'run-with-codex.command',
+    };
+    return names[toolId] || null;
+  }
+
+  function getLabel(toolId) {
+    const labels = {
+      'claude-code': 'Claude Code command',
+      'claude-app': 'Claude App script',
+      'cursor': 'Cursor command',
+      'chatgpt': 'ChatGPT',
+      'codex': 'Codex command',
+      'raw': 'Raw instructions',
+    };
+    return labels[toolId] || 'Command';
+  }
+
+  // Download a file as blob
+  function downloadFile(content, filename) {
+    const blob = new Blob([content], { type: 'application/octet-stream' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -150,61 +185,65 @@
     URL.revokeObjectURL(url);
   }
 
-  // Try to open an app via URL scheme (hidden iframe, fails silently)
-  function tryDeepLink(url) {
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = url;
-    document.body.appendChild(iframe);
-    setTimeout(() => {
-      try { document.body.removeChild(iframe); } catch (e) {}
-    }, 2000);
-  }
-
   // --- Main handler ---
 
   window.copyForTool = function (toolId) {
-    const tool = TOOLS[toolId];
-    if (!tool) return;
+    // Always copy prompt to clipboard
+    const escaped = escapeShellArg(promptContent);
+    let displayCmd;
 
-    // Determine what to copy
-    const copyText = tool.type === 'cli' ? tool.command() : promptContent;
+    switch (toolId) {
+      case 'claude-code': displayCmd = `claude -p '${escaped}'`; break;
+      case 'cursor': displayCmd = `cursor --prompt '${escaped}'`; break;
+      case 'codex': displayCmd = `codex '${escaped}'`; break;
+      default: displayCmd = promptContent;
+    }
 
-    // Always copy to clipboard
-    navigator.clipboard.writeText(copyText);
+    navigator.clipboard.writeText(toolId === 'raw' ? promptContent : displayCmd);
 
     // Show command preview
     const section = document.getElementById('command-section');
     section.style.display = '';
-    document.getElementById('command-label').textContent = tool.label;
-    document.getElementById('command-output').textContent = copyText;
+    document.getElementById('command-label').textContent = getLabel(toolId);
+    document.getElementById('command-output').textContent = toolId === 'raw' ? promptContent : displayCmd;
 
-    // Highlight selected tool
+    // Highlight selected
     document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('selected'));
     event.currentTarget.classList.add('selected');
 
     const hint = document.getElementById('run-hint');
 
-    if (tool.type === 'app') {
-      // Open the web app in a new tab — prompt is in clipboard
-      window.open(tool.url, '_blank');
-      hint.innerHTML = '<strong style="color:var(--fg)">Prompt copied!</strong> Paste (<kbd style="background:var(--bg-hover);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:.75rem">&#8984;V</kbd>) into the chat and send.';
-      hint.style.display = '';
-      showToast('Opening app — prompt copied');
-    } else if (tool.type === 'cli') {
-      // Download .command file + try deep link if available
-      if (tool.deepLink) {
-        tryDeepLink(tool.deepLink);
-      }
-      downloadCommandFile(copyText, tool.filename);
-      hint.innerHTML = '<strong style="color:var(--fg)">Next:</strong> Open the downloaded <code>.command</code> file to run in Terminal. Or paste (<kbd style="background:var(--bg-hover);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:.75rem">&#8984;V</kbd>) the command into your terminal.';
-      hint.style.display = '';
-      showToast('Downloaded & copied to clipboard');
-    } else {
-      // Raw copy
+    if (toolId === 'raw') {
       hint.style.display = 'none';
       showToast('Copied to clipboard');
+      return;
     }
+
+    if (toolId === 'chatgpt') {
+      // ChatGPT supports ?q= — open directly with prompt pre-filled
+      window.open('https://chatgpt.com/?q=' + encodeURIComponent(promptContent), '_blank');
+      hint.innerHTML = '<strong style="color:var(--fg)">Done!</strong> ChatGPT opened with your prompt pre-filled.';
+      hint.style.display = '';
+      showToast('Prompt sent to ChatGPT');
+      return;
+    }
+
+    // For all other tools: download a .command script
+    const script = generateScript(toolId);
+    const filename = getFilename(toolId);
+
+    if (script && filename) {
+      downloadFile(script, filename);
+    }
+
+    // Tool-specific hints
+    if (toolId === 'claude-app') {
+      hint.innerHTML = '<strong style="color:var(--fg)">Downloaded!</strong> Open <code>run-with-claude-app.command</code> — it will launch Claude, paste the prompt, and send it automatically.';
+    } else {
+      hint.innerHTML = '<strong style="color:var(--fg)">Downloaded!</strong> Open the <code>.command</code> file to run in Terminal.';
+    }
+    hint.style.display = '';
+    showToast('Downloaded — open to run');
   };
 
   window.copyCommand = function () {
