@@ -89,70 +89,55 @@
     document.getElementById('error-detail').textContent = msg;
   }
 
-  function generateCommand(tool) {
-    const escaped = promptContent.replace(/'/g, "'\\''");
-    switch (tool) {
-      case 'claude': return `claude -p '${escaped}'`;
-      case 'cursor': return `cursor --prompt '${escaped}'`;
-      case 'codex': return `codex '${escaped}'`;
-      case 'raw': return promptContent;
-      default: return promptContent;
-    }
-  }
+  // --- Tool definitions ---
 
-  function getLabel(tool) {
-    switch (tool) {
-      case 'claude': return 'Claude Code command';
-      case 'cursor': return 'Cursor command';
-      case 'codex': return 'Codex command';
-      case 'raw': return 'Raw instructions';
-      default: return 'Command';
-    }
-  }
+  const TOOLS = {
+    'claude-code': {
+      label: 'Claude Code command',
+      type: 'cli',
+      command: () => {
+        const escaped = promptContent.replace(/'/g, "'\\''");
+        return `claude -p '${escaped}'`;
+      },
+      filename: 'run-with-claude-code.command',
+    },
+    'claude-app': {
+      label: 'Claude App',
+      type: 'app',
+      url: 'https://claude.ai/new',
+    },
+    'cursor': {
+      label: 'Cursor command',
+      type: 'cli',
+      command: () => {
+        const escaped = promptContent.replace(/'/g, "'\\''");
+        return `cursor --prompt '${escaped}'`;
+      },
+      filename: 'run-with-cursor.command',
+      deepLink: 'cursor://',
+    },
+    'chatgpt': {
+      label: 'ChatGPT',
+      type: 'app',
+      url: 'https://chatgpt.com',
+    },
+    'codex': {
+      label: 'Codex command',
+      type: 'cli',
+      command: () => {
+        const escaped = promptContent.replace(/'/g, "'\\''");
+        return `codex '${escaped}'`;
+      },
+      filename: 'run-with-codex.command',
+    },
+    'raw': {
+      label: 'Raw instructions',
+      type: 'copy',
+    },
+  };
 
-  // --- Deep link / URL scheme support ---
-
-  // Try to open an app via its registered URL scheme.
-  // Uses a hidden iframe so the browser doesn't show an error if the scheme isn't registered.
-  function tryDeepLink(url) {
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = url;
-    document.body.appendChild(iframe);
-    setTimeout(() => {
-      try { document.body.removeChild(iframe); } catch (e) {}
-    }, 2000);
-  }
-
-  // Build deep link URLs to try for the tool.
-  // Hidden iframe approach fails silently if scheme isn't registered — zero downside.
-  function getDeepLinks(tool) {
-    switch (tool) {
-      case 'claude':
-        // Try Claude desktop app and Claude Code
-        return ['claude://'];
-      case 'cursor':
-        // Cursor registers cursor:// (VS Code fork)
-        return ['cursor://'];
-      case 'codex':
-        // Try OpenAI ChatGPT desktop app
-        return ['chatgpt://'];
-      default:
-        return [];
-    }
-  }
-
-  // Download a .command file (macOS: double-click opens Terminal and runs it)
-  function downloadCommandFile(tool) {
-    const cmd = generateCommand(tool);
-    const names = {
-      claude: 'run-with-claude.command',
-      cursor: 'run-with-cursor.command',
-      codex: 'run-with-codex.command',
-    };
-    const filename = names[tool];
-    if (!filename) return;
-
+  // Download a .command file (macOS: double-click opens Terminal)
+  function downloadCommandFile(cmd, filename) {
     const script = '#!/bin/bash\n' + cmd + '\n';
     const blob = new Blob([script], { type: 'application/octet-stream' });
     const url = URL.createObjectURL(blob);
@@ -165,44 +150,60 @@
     URL.revokeObjectURL(url);
   }
 
+  // Try to open an app via URL scheme (hidden iframe, fails silently)
+  function tryDeepLink(url) {
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = url;
+    document.body.appendChild(iframe);
+    setTimeout(() => {
+      try { document.body.removeChild(iframe); } catch (e) {}
+    }, 2000);
+  }
+
   // --- Main handler ---
 
-  window.copyForTool = function (tool) {
-    const cmd = generateCommand(tool);
+  window.copyForTool = function (toolId) {
+    const tool = TOOLS[toolId];
+    if (!tool) return;
 
-    // Always show command preview
-    const section = document.getElementById('command-section');
-    section.style.display = '';
-    document.getElementById('command-label').textContent = getLabel(tool);
-    document.getElementById('command-output').textContent = cmd;
+    // Determine what to copy
+    const copyText = tool.type === 'cli' ? tool.command() : promptContent;
 
     // Always copy to clipboard
-    navigator.clipboard.writeText(cmd);
+    navigator.clipboard.writeText(copyText);
+
+    // Show command preview
+    const section = document.getElementById('command-section');
+    section.style.display = '';
+    document.getElementById('command-label').textContent = tool.label;
+    document.getElementById('command-output').textContent = copyText;
 
     // Highlight selected tool
     document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('selected'));
     event.currentTarget.classList.add('selected');
 
-    if (tool === 'raw') {
-      document.getElementById('run-hint').style.display = 'none';
-      showToast('Copied to clipboard');
-      return;
-    }
+    const hint = document.getElementById('run-hint');
 
-    // Try deep links (opens the app if installed, fails silently if not)
-    const deepLinks = getDeepLinks(tool);
-    deepLinks.forEach(link => tryDeepLink(link));
-
-    // Download .command file for terminal-based tools
-    downloadCommandFile(tool);
-
-    // Show next-step hint
-    document.getElementById('run-hint').style.display = '';
-
-    if (deepLinks.length > 0) {
-      showToast('Opening app — command also copied');
-    } else {
+    if (tool.type === 'app') {
+      // Open the web app in a new tab — prompt is in clipboard
+      window.open(tool.url, '_blank');
+      hint.innerHTML = '<strong style="color:var(--fg)">Prompt copied!</strong> Paste (<kbd style="background:var(--bg-hover);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:.75rem">&#8984;V</kbd>) into the chat and send.';
+      hint.style.display = '';
+      showToast('Opening app — prompt copied');
+    } else if (tool.type === 'cli') {
+      // Download .command file + try deep link if available
+      if (tool.deepLink) {
+        tryDeepLink(tool.deepLink);
+      }
+      downloadCommandFile(copyText, tool.filename);
+      hint.innerHTML = '<strong style="color:var(--fg)">Next:</strong> Open the downloaded <code>.command</code> file to run in Terminal. Or paste (<kbd style="background:var(--bg-hover);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:.75rem">&#8984;V</kbd>) the command into your terminal.';
+      hint.style.display = '';
       showToast('Downloaded & copied to clipboard');
+    } else {
+      // Raw copy
+      hint.style.display = 'none';
+      showToast('Copied to clipboard');
     }
   };
 
