@@ -1,3 +1,0 @@
-# Cloudflare Pages redirects
-# Route /open to open.html (SPA-style routing)
-/open    /open.html    200
