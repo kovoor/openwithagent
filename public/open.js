@@ -96,7 +96,7 @@
       desc: 'Anthropic CLI',
       icon: '>_',
       buildCommand: (prompt) =>
-        `claude -p <<'PROMPT'\n${prompt}\nPROMPT`,
+        `claude -p <<'PROMPT'\n${prompt}\nPROMPT\n`,
     },
     {
       id: 'codex',
@@ -104,7 +104,7 @@
       desc: 'OpenAI CLI',
       icon: '>_',
       buildCommand: (prompt) =>
-        `codex <<'PROMPT'\n${prompt}\nPROMPT`,
+        `codex <<'PROMPT'\n${prompt}\nPROMPT\n`,
     },
   ];
 
