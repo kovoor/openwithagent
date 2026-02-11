@@ -95,7 +95,7 @@
       name: 'Claude Code',
       desc: 'Anthropic CLI',
       icon: '>_',
-      bin: 'claude -p',
+      bin: 'claude -p --verbose',
     },
     {
       id: 'codex',
