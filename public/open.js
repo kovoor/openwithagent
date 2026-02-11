@@ -1,4 +1,4 @@
-// open.js — tool picker logic for OpenWithAI
+// open.js — tool picker logic for OpenWithAgent
 (function () {
   let promptContent = '';
   let repoName = '';
@@ -16,7 +16,7 @@
       showError('Invalid prompt encoding. The link may be malformed.');
     }
   } else if (repoParam) {
-    // Fetch .openwithai.md from GitHub
+    // Fetch .openwithagent.md from GitHub
     repoName = repoParam;
     fetchFromRepo(repoParam);
   } else {
@@ -29,7 +29,7 @@
 
     for (const branch of branches) {
       try {
-        const url = `https://raw.githubusercontent.com/${repo}/${branch}/.openwithai.md`;
+        const url = `https://raw.githubusercontent.com/${repo}/${branch}/.openwithagent.md`;
         const res = await fetch(url);
         if (res.ok) {
           promptContent = await res.text();
@@ -45,7 +45,7 @@
       showReady();
     } else {
       showError(
-        `Could not find .openwithai.md in ${repo}. ` +
+        `Could not find .openwithagent.md in ${repo}. ` +
         'Make sure the file exists on the main or master branch.'
       );
     }
@@ -115,9 +115,9 @@
 
     // Highlight selected tool
     document.querySelectorAll('.tool-btn').forEach(btn => {
-      btn.style.borderColor = '';
+      btn.classList.remove('selected');
     });
-    event.currentTarget.style.borderColor = 'var(--accent)';
+    event.currentTarget.classList.add('selected');
   };
 
   window.copyCommand = function () {
