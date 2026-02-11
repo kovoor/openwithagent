@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenWithAI — One-click AI setup for any repo</title>
+  <meta name="description" content="Add a badge to your repo that lets users install your tool with their favorite AI coding assistant. One click, any AI tool.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">
+      <span class="sparkle">&#10024;</span> OpenWithAI
+    </a>
+    <div style="display:flex;gap:1rem;align-items:center">
+      <a href="https://github.com/kovoor/openwithai" class="nav-link">GitHub</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <section class="hero">
+      <h1>Setup any tool.<br><span class="gradient">One click. Any AI.</span></h1>
+      <p>Add a badge to your repo that hands off installation to the user's AI coding assistant of choice.</p>
+    </section>
+
+    <!-- How it works -->
+    <section>
+      <h2 style="font-size:1.25rem;font-weight:700;margin-bottom:1.25rem">How it works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div>
+            <h3 style="font-weight:600;margin-bottom:.25rem">Create your link</h3>
+            <p style="color:var(--text-muted);font-size:.875rem">Use the generator below to encode your install instructions into a URL. Or add an <code>.openwithai.md</code> file to your repo.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div>
+            <h3 style="font-weight:600;margin-bottom:.25rem">Add the badge</h3>
+            <p style="color:var(--text-muted);font-size:.875rem">Paste the badge markdown into your README. Users see a clean "Open with AI" button.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div>
+            <h3 style="font-weight:600;margin-bottom:.25rem">Users click and go</h3>
+            <p style="color:var(--text-muted);font-size:.875rem">They pick their AI tool (Claude Code, Cursor, Codex) and get a ready-to-paste command.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Supported tools -->
+    <section style="margin:2.5rem 0">
+      <h2 style="font-size:1.25rem;font-weight:700;margin-bottom:1rem">Supported tools</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem">
+        <div class="card" style="text-align:center">
+          <div style="font-size:1.5rem;margin-bottom:.25rem">&#9641;</div>
+          <h3>Claude Code</h3>
+          <p>Terminal command</p>
+        </div>
+        <div class="card" style="text-align:center">
+          <div style="font-size:1.5rem;margin-bottom:.25rem">&#9998;</div>
+          <h3>Cursor</h3>
+          <p>Terminal command</p>
+        </div>
+        <div class="card" style="text-align:center">
+          <div style="font-size:1.5rem;margin-bottom:.25rem">&#9881;</div>
+          <h3>OpenAI Codex</h3>
+          <p>Terminal command</p>
+        </div>
+        <div class="card" style="text-align:center">
+          <div style="font-size:1.5rem;margin-bottom:.25rem">&#128203;</div>
+          <h3>Copy prompt</h3>
+          <p>Any AI tool</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Link Generator -->
+    <section class="generator" id="generator">
+      <h2>Create your link</h2>
+      <p style="color:var(--text-muted);font-size:.875rem;margin-bottom:1rem">Enter your install instructions and get a shareable link + badge markdown.</p>
+
+      <div class="generator-box">
+        <!-- Mode tabs -->
+        <div class="tabs">
+          <button class="tab active" data-mode="prompt" onclick="setMode('prompt')">Encode instructions in URL</button>
+          <button class="tab" data-mode="repo" onclick="setMode('repo')">Link to .openwithai.md</button>
+        </div>
+
+        <!-- Prompt mode -->
+        <div id="mode-prompt">
+          <label for="gen-prompt">Install instructions</label>
+          <textarea id="gen-prompt" placeholder="# Install MyTool&#10;&#10;1. Clone: git clone https://github.com/you/mytool&#10;2. Run: cd mytool && ./install.sh&#10;3. Restart your terminal" oninput="updateOutput()"></textarea>
+        </div>
+
+        <!-- Repo mode -->
+        <div id="mode-repo" style="display:none">
+          <label for="gen-repo">GitHub repo (owner/name)</label>
+          <input type="text" id="gen-repo" placeholder="kovoor/ClaudeCodeNotifier" oninput="updateOutput()">
+          <p style="font-size:.75rem;color:var(--text-muted);margin-top:.25rem">
+            Make sure your repo has an <code>.openwithai.md</code> file in the root.
+          </p>
+        </div>
+
+        <!-- Output: URL -->
+        <div>
+          <label>Your link</label>
+          <div class="output-block">
+            <code id="output-url">—</code>
+            <button class="btn btn-ghost copy-btn" onclick="copyText('output-url')" title="Copy link">&#128203;</button>
+          </div>
+        </div>
+
+        <!-- Output: Badge markdown -->
+        <div>
+          <label>Badge markdown</label>
+          <div class="output-block">
+            <code id="output-badge">—</code>
+            <button class="btn btn-ghost copy-btn" onclick="copyText('output-badge')" title="Copy markdown">&#128203;</button>
+          </div>
+        </div>
+
+        <!-- Badge preview -->
+        <div>
+          <label>Preview</label>
+          <div class="badge-preview" id="badge-preview">
+            <img src="/badge.svg" alt="Open with AI" height="28">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- .openwithai.md convention -->
+    <section style="margin:2.5rem 0">
+      <h2 style="font-size:1.25rem;font-weight:700;margin-bottom:1rem">The <code>.openwithai.md</code> convention</h2>
+      <p style="color:var(--text-muted);font-size:.875rem;margin-bottom:1rem">
+        Alternatively, add an <code>.openwithai.md</code> file to your repo root. When a user clicks the badge, we'll fetch it automatically.
+      </p>
+      <div class="card">
+        <pre style="font-family:var(--mono);font-size:.8rem;white-space:pre-wrap;color:var(--text-muted)"># Install MyTool
+
+Clone the repo, install dependencies, and run the setup script.
+
+## Steps
+1. Clone: `git clone https://github.com/you/mytool.git`
+2. Install: `cd mytool && npm install`
+3. Setup: `npm run setup`
+4. Verify: `npm test`</pre>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <p>OpenWithAI &mdash; open source, made by <a href="https://github.com/kovoor">@kovoor</a></p>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let currentMode = 'prompt';
+    const BASE = location.origin;
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+      document.getElementById('mode-prompt').style.display = mode === 'prompt' ? '' : 'none';
+      document.getElementById('mode-repo').style.display = mode === 'repo' ? '' : 'none';
+      updateOutput();
+    }
+
+    function updateOutput() {
+      const urlEl = document.getElementById('output-url');
+      const badgeEl = document.getElementById('output-badge');
+      let url = '';
+
+      if (currentMode === 'prompt') {
+        const prompt = document.getElementById('gen-prompt').value.trim();
+        if (!prompt) { urlEl.textContent = '—'; badgeEl.textContent = '—'; return; }
+        const encoded = btoa(unescape(encodeURIComponent(prompt)));
+        url = `${BASE}/open?prompt=${encoded}`;
+      } else {
+        const repo = document.getElementById('gen-repo').value.trim();
+        if (!repo) { urlEl.textContent = '—'; badgeEl.textContent = '—'; return; }
+        url = `${BASE}/open?repo=${encodeURIComponent(repo)}`;
+      }
+
+      urlEl.textContent = url;
+      badgeEl.textContent = `[![Open with AI](${BASE}/badge.svg)](${url})`;
+    }
+
+    function copyText(elId) {
+      const text = document.getElementById(elId).textContent;
+      if (!text || text === '—') return;
+      navigator.clipboard.writeText(text);
+      showToast('Copied to clipboard');
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
+    }
+  </script>
+</body>
+</html>

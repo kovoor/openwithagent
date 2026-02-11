@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Open with AI</title>
+  <meta name="description" content="Pick your AI coding assistant and get started.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">
+      <span class="sparkle">&#10024;</span> OpenWithAI
+    </a>
+    <div style="display:flex;gap:1rem;align-items:center">
+      <a href="/#generator" class="nav-link">Create link</a>
+      <a href="https://github.com/kovoor/openwithai" class="nav-link">GitHub</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Status -->
+    <div id="status" class="status loading" style="margin:1.5rem 0">
+      Loading instructions...
+    </div>
+
+    <!-- Main content (hidden until loaded) -->
+    <div id="main" style="display:none">
+      <!-- Repo info -->
+      <div id="repo-info" style="margin-bottom:1rem;display:none">
+        <h1 style="font-size:1.5rem;font-weight:700" id="repo-name"></h1>
+      </div>
+
+      <h2 style="font-size:1.15rem;font-weight:600;margin-bottom:.25rem">Pick your AI tool</h2>
+      <p style="color:var(--text-muted);font-size:.875rem;margin-bottom:.25rem">Click to copy the command for your preferred AI coding assistant.</p>
+
+      <div class="tool-grid">
+        <button class="tool-btn" onclick="copyForTool('claude')">
+          <span class="tool-icon">&#9641;</span>
+          <span class="tool-name">Claude Code</span>
+          <span class="tool-desc">Copy terminal command</span>
+        </button>
+        <button class="tool-btn" onclick="copyForTool('cursor')">
+          <span class="tool-icon">&#9998;</span>
+          <span class="tool-name">Cursor</span>
+          <span class="tool-desc">Copy terminal command</span>
+        </button>
+        <button class="tool-btn" onclick="copyForTool('codex')">
+          <span class="tool-icon">&#9881;</span>
+          <span class="tool-name">OpenAI Codex</span>
+          <span class="tool-desc">Copy terminal command</span>
+        </button>
+        <button class="tool-btn" onclick="copyForTool('raw')">
+          <span class="tool-icon">&#128203;</span>
+          <span class="tool-name">Copy prompt</span>
+          <span class="tool-desc">Paste into any AI tool</span>
+        </button>
+      </div>
+
+      <!-- Command preview -->
+      <div id="command-section" style="display:none;margin-top:1.25rem">
+        <label id="command-label">Command</label>
+        <div class="output-block" style="min-height:60px;align-items:flex-start;padding:1rem">
+          <code id="command-output" style="white-space:pre-wrap"></code>
+          <button class="btn btn-ghost copy-btn" onclick="copyCommand()" title="Copy" style="top:12px;right:12px">&#128203;</button>
+        </div>
+      </div>
+
+      <!-- Instructions preview -->
+      <details style="margin-top:1.5rem">
+        <summary style="cursor:pointer;color:var(--text-muted);font-size:.875rem;font-weight:500">View instructions</summary>
+        <div class="prompt-preview" style="margin-top:.75rem">
+          <pre id="prompt-content"></pre>
+        </div>
+      </details>
+    </div>
+
+    <!-- Error state -->
+    <div id="error-state" style="display:none;text-align:center;padding:3rem 0">
+      <p style="font-size:1.25rem;margin-bottom:.5rem">Could not load instructions</p>
+      <p style="color:var(--text-muted);font-size:.875rem" id="error-detail"></p>
+      <a href="/" class="btn btn-secondary" style="margin-top:1.5rem">Create your own link</a>
+    </div>
+  </div>
+
+  <footer>
+    <p>OpenWithAI &mdash; open source, made by <a href="https://github.com/kovoor">@kovoor</a></p>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="/open.js"></script>
+</body>
+</html>
