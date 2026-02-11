@@ -1,5 +1,5 @@
 // open.js — tool picker logic for OpenWithAgent
-// Every button is a direct link. Click → app opens with prompt. No copy-paste.
+// Web app buttons are direct links. Terminal buttons copy the command.
 (function () {
   let promptContent = '';
   let repoName = '';
@@ -68,35 +68,55 @@
     );
   }
 
-  // --- AI platforms with universal link support ---
-  // Each platform gets a URL that opens with the prompt pre-filled via query param.
+  // --- Web-based AI platforms (universal link support) ---
 
   const AI_PLATFORMS = [
     {
       id: 'chatgpt',
       name: 'ChatGPT',
       desc: 'by OpenAI',
-      iconClass: 'icon-chatgpt',
-      icon: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/><path d="M8 12.5l2.5 2.5L16 9"/></svg>',
+      logo: '/logo-chatgpt.png',
       buildUrl: (prompt) => 'https://chatgpt.com/?q=' + encodeURIComponent(prompt),
     },
     {
       id: 'claude',
       name: 'Claude',
       desc: 'by Anthropic',
-      iconClass: 'icon-claude',
-      icon: '<svg viewBox="0 0 24 24" width="22" height="22" fill="#fff"><path d="M12 2L14.1 8.4L21 10L14.1 11.6L12 18L9.9 11.6L3 10L9.9 8.4Z"/><path d="M18 3l.6 1.8L20.5 5.5 18.6 6.2 18 8l-.6-1.8L15.5 5.5l1.9-.7Z" opacity=".5"/></svg>',
+      logo: '/logo-claude.png',
       buildUrl: (prompt) => 'https://claude.ai/new?q=' + encodeURIComponent(prompt),
     },
     {
       id: 'gemini',
       name: 'Gemini',
       desc: 'by Google',
-      iconClass: 'icon-gemini',
-      icon: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M12 2C12 7.52 7.52 12 2 12c5.52 0 10 4.48 10 10 0-5.52 4.48-10 10-10-5.52 0-10-4.48-10-10z" fill="#fff"/></svg>',
+      logo: '/logo-gemini.png',
       buildUrl: (prompt) => 'https://gemini.google.com/app?q=' + encodeURIComponent(prompt),
     },
   ];
+
+  // --- Terminal-based agents (copy command to clipboard) ---
+
+  const TERMINAL_AGENTS = [
+    {
+      id: 'claude-code',
+      name: 'Claude Code',
+      desc: 'Anthropic CLI',
+      icon: '>_',
+      buildCommand: (prompt) => `claude -p ${shellQuote(prompt)}`,
+    },
+    {
+      id: 'codex',
+      name: 'Codex CLI',
+      desc: 'OpenAI CLI',
+      icon: '>_',
+      buildCommand: (prompt) => `codex ${shellQuote(prompt)}`,
+    },
+  ];
+
+  function shellQuote(str) {
+    // Use $'...' syntax for safe shell quoting
+    return "$'" + str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n') + "'";
+  }
 
   function showReady() {
     document.getElementById('status').style.display = 'none';
@@ -113,9 +133,9 @@
 
     document.getElementById('prompt-content').textContent = promptContent;
 
-    // Build the AI platform buttons as direct links
-    const container = document.getElementById('ai-buttons');
-    container.innerHTML = '';
+    // Build web app buttons as direct links
+    const webContainer = document.getElementById('ai-buttons');
+    webContainer.innerHTML = '';
 
     AI_PLATFORMS.forEach(platform => {
       const url = platform.buildUrl(promptContent);
@@ -125,14 +145,43 @@
       a.rel = 'noopener';
       a.className = 'ai-btn';
       a.innerHTML = `
-        <div class="ai-icon ${platform.iconClass}">${platform.icon}</div>
+        <div class="ai-icon"><img src="${platform.logo}" alt="${platform.name}"></div>
         <div>
           <div class="ai-name">${platform.name}</div>
           <div class="ai-desc">${platform.desc}</div>
         </div>
         <span class="ai-arrow">&#8250;</span>
       `;
-      container.appendChild(a);
+      webContainer.appendChild(a);
+    });
+
+    // Build terminal agent buttons (copy command on click)
+    const termContainer = document.getElementById('terminal-buttons');
+    termContainer.innerHTML = '';
+
+    TERMINAL_AGENTS.forEach(agent => {
+      const command = agent.buildCommand(promptContent);
+      const btn = document.createElement('button');
+      btn.className = 'terminal-btn';
+      btn.innerHTML = `
+        <div class="term-icon">${agent.icon}</div>
+        <div>
+          <div class="ai-name">${agent.name}</div>
+          <div class="ai-desc">${agent.desc}</div>
+        </div>
+        <span class="copy-label">copy command</span>
+      `;
+      btn.addEventListener('click', () => {
+        navigator.clipboard.writeText(command);
+        btn.classList.add('copied');
+        btn.querySelector('.copy-label').textContent = 'copied!';
+        showToast('Command copied to clipboard');
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.querySelector('.copy-label').textContent = 'copy command';
+        }, 2000);
+      });
+      termContainer.appendChild(btn);
     });
   }
 
