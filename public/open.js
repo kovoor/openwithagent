@@ -107,6 +107,16 @@
   ];
 
   function buildTerminalCommand(bin, prompt) {
+    // For repo-based links, give a short command — the AI agent can clone and read the README itself
+    if (repoName) {
+      return `${bin} "Clone and set up https://github.com/${repoName} following its .openwithagent.md or README"`;
+    }
+    // For short custom prompts, quote directly
+    const safe = prompt.replace(/"/g, '\\"');
+    if (safe.length < 2000) {
+      return `${bin} "${safe}"`;
+    }
+    // Fallback: base64 for very long custom prompts
     const b64 = btoa(unescape(encodeURIComponent(prompt)));
     return `echo '${b64}' | base64 -d | ${bin}`;
   }
