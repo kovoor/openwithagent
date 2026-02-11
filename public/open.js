@@ -77,7 +77,7 @@
       name: 'ChatGPT',
       desc: 'by OpenAI',
       iconClass: 'icon-chatgpt',
-      icon: 'G',
+      icon: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/><path d="M8 12.5l2.5 2.5L16 9"/></svg>',
       buildUrl: (prompt) => 'https://chatgpt.com/?q=' + encodeURIComponent(prompt),
     },
     {
@@ -85,7 +85,7 @@
       name: 'Claude',
       desc: 'by Anthropic',
       iconClass: 'icon-claude',
-      icon: 'C',
+      icon: '<svg viewBox="0 0 24 24" width="22" height="22" fill="#fff"><path d="M12 2L14.1 8.4L21 10L14.1 11.6L12 18L9.9 11.6L3 10L9.9 8.4Z"/><path d="M18 3l.6 1.8L20.5 5.5 18.6 6.2 18 8l-.6-1.8L15.5 5.5l1.9-.7Z" opacity=".5"/></svg>',
       buildUrl: (prompt) => 'https://claude.ai/new?q=' + encodeURIComponent(prompt),
     },
     {
@@ -93,16 +93,8 @@
       name: 'Gemini',
       desc: 'by Google',
       iconClass: 'icon-gemini',
-      icon: 'G',
+      icon: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M12 2C12 7.52 7.52 12 2 12c5.52 0 10 4.48 10 10 0-5.52 4.48-10 10-10-5.52 0-10-4.48-10-10z" fill="#fff"/></svg>',
       buildUrl: (prompt) => 'https://gemini.google.com/app?q=' + encodeURIComponent(prompt),
-    },
-    {
-      id: 'copilot',
-      name: 'Copilot',
-      desc: 'by Microsoft',
-      iconClass: 'icon-copilot',
-      icon: 'C',
-      buildUrl: (prompt) => 'https://copilot.microsoft.com/?q=' + encodeURIComponent(prompt),
     },
   ];
 
