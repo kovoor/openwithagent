@@ -1,26 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="192" height="32" viewBox="0 0 192 32">
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="40" viewBox="0 0 220 40">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#141414"/>
-      <stop offset="50%" stop-color="#1a1a1a"/>
-      <stop offset="100%" stop-color="#0d0d0d"/>
-    </linearGradient>
-    <linearGradient id="shine" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#fff" stop-opacity="0.06"/>
-      <stop offset="50%" stop-color="#fff" stop-opacity="0.1"/>
-      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a1a"/>
+      <stop offset="100%" stop-color="#111111"/>
     </linearGradient>
     <linearGradient id="star-fill" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#d4b896"/>
       <stop offset="100%" stop-color="#c4a882"/>
     </linearGradient>
   </defs>
-  <rect x="0.5" y="0.5" width="191" height="31" rx="8" fill="none" stroke="#2a2a2a" stroke-width="1"/>
-  <rect x="1" y="1" width="190" height="30" rx="7.5" fill="url(#bg)"/>
-  <rect x="1" y="1" width="190" height="15" rx="7.5" fill="url(#shine)"/>
-  <g transform="translate(14, 8)">
-    <path d="M7 0L8.8 4.8L14 6.5L8.8 8.2L7 13L5.2 8.2L0 6.5L5.2 4.8Z" fill="url(#star-fill)" opacity="0.9"/>
-    <path d="M12.5 0L13.2 2L15.5 2.5L13.2 3L12.5 5L11.8 3L9.5 2.5L11.8 2Z" fill="#c4a882" opacity="0.35"/>
+  <rect x="0.5" y="0.5" width="219" height="39" rx="10" fill="url(#bg)" stroke="#333" stroke-width="1"/>
+  <g transform="translate(18, 10)">
+    <path d="M8 0L10.1 5.5L16 7.5L10.1 9.5L8 15L5.9 9.5L0 7.5L5.9 5.5Z" fill="url(#star-fill)" opacity="0.85"/>
+    <path d="M14.5 0.5L15.3 2.5L17.5 3L15.3 3.5L14.5 5.5L13.7 3.5L11.5 3L13.7 2.5Z" fill="#c4a882" opacity="0.3"/>
   </g>
-  <text x="36" y="20.5" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,monospace" font-size="13" font-weight="600" fill="#e8e5e3" letter-spacing="0.3">Open with Agent</text>
+  <text x="44" y="25.5" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,monospace" font-size="14.5" font-weight="600" fill="#e8e5e3" letter-spacing="0.2">Open with Agent</text>
 </svg>

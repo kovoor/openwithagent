@@ -2,7 +2,7 @@
 
 One-click badges that hand off installation to the user's AI coding assistant.
 
-[![Open with Agent](https://openwithagent.dev/badge.svg)](https://openwithagent.dev/open?repo=kovoor/openwithagent)
+[![Open with Agent](https://openwithagent.pages.dev/badge-dark.svg)](https://openwithagent.pages.dev/open?repo=kovoor/openwithagent)
 
 ## What is this?
 
@@ -18,7 +18,7 @@ Developer tools often require complex installation steps. **OpenWithAgent** give
 
 ### Option A: Encode in the URL (no file needed)
 
-Use the [link generator](https://openwithagent.dev/#generator) to encode your instructions into the URL. Nothing to add to your repo.
+Use the [link generator](https://openwithagent.pages.dev/#generator) to encode your instructions into the URL. Nothing to add to your repo.
 
 ### Option B: `.openwithagent.md` file
 
@@ -35,15 +35,19 @@ Add a `.openwithagent.md` file to your repo root with AI-friendly install instru
 Then link to it:
 
 ```markdown
-[![Open with Agent](https://openwithagent.dev/badge.svg)](https://openwithagent.dev/open?repo=you/mytool)
+[![Open with Agent](https://openwithagent.pages.dev/badge-dark.svg)](https://openwithagent.pages.dev/open?repo=you/mytool)
 ```
+
+### Fallback: No file needed
+
+If your repo doesn't have a `.openwithagent.md` file, OpenWithAgent automatically fetches your `README.md` and uses it as context. The AI gets your full README and instructions to clone and set up the project — no extra work required.
 
 ## Badge variants
 
-| Variant | Markdown |
-|---------|----------|
-| Default | `[![Open with Agent](https://openwithagent.dev/badge.svg)](YOUR_URL)` |
-| Dark | `[![Open with Agent](https://openwithagent.dev/badge-dark.svg)](YOUR_URL)` |
+| Variant | Preview | Markdown |
+|---------|---------|----------|
+| Light (for dark backgrounds) | ![badge](https://openwithagent.pages.dev/badge.svg) | `[![Open with Agent](https://openwithagent.pages.dev/badge.svg)](YOUR_URL)` |
+| Dark (for light backgrounds) | ![badge](https://openwithagent.pages.dev/badge-dark.svg) | `[![Open with Agent](https://openwithagent.pages.dev/badge-dark.svg)](YOUR_URL)` |
 
 ## Supported tools
 

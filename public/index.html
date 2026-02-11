@@ -11,7 +11,7 @@
 <body>
   <nav>
     <a href="/" class="logo">
-      <span class="sparkle">&#10024;</span> OpenWithAgent
+      <img src="/favicon.svg" alt="" width="20" height="20" style="border-radius:4px"> OpenWithAgent
     </a>
     <div class="nav-links">
       <a href="https://github.com/kovoor/openwithagent" class="nav-link">GitHub</a>
@@ -111,7 +111,7 @@
     <section style="margin-bottom:3rem">
       <div class="section-label">The .openwithagent.md convention</div>
       <p style="color:var(--fg-muted);margin-bottom:.75rem">
-        Alternatively, add an <code>.openwithagent.md</code> file to your repo root with AI-friendly install instructions. When a user clicks the badge, we fetch it automatically.
+        Optionally, add an <code>.openwithagent.md</code> file to your repo root with AI-friendly install instructions. When a user clicks the badge, we fetch it automatically.
       </p>
       <div class="code-block">
         <pre># Install MyTool
@@ -123,6 +123,9 @@ Clone the repo, install dependencies, and run the setup script.
 2. Install: `cd mytool && npm install`
 3. Setup: `npm run setup`</pre>
       </div>
+      <p style="color:var(--fg-dim);font-size:.8125rem;margin-top:.75rem">
+        No file? No problem. If your repo doesn't have <code>.openwithagent.md</code>, we'll use the <code>README.md</code> as context and let the AI figure out the setup steps.
+      </p>
     </section>
 
     <!-- FAQ -->

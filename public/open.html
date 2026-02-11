@@ -11,7 +11,7 @@
 <body>
   <nav>
     <a href="/" class="logo">
-      <span class="sparkle">&#10024;</span> OpenWithAgent
+      <img src="/favicon.svg" alt="" width="20" height="20" style="border-radius:4px"> OpenWithAgent
     </a>
     <div class="nav-links">
       <a href="/#generator" class="nav-link">Create link</a>
@@ -30,6 +30,11 @@
       <!-- Repo info -->
       <div id="repo-info" style="margin-bottom:.25rem;display:none">
         <p style="font-size:.8125rem;color:var(--fg-muted)" id="repo-name"></p>
+      </div>
+
+      <!-- Fallback notice -->
+      <div id="fallback-notice" style="display:none;margin:.75rem 0;padding:.6rem .85rem;background:var(--accent-dim);border:1px solid var(--border);border-radius:8px;font-size:.8125rem;color:var(--fg-muted)">
+        No <code>.openwithagent.md</code> found &mdash; using the README as context instead.
       </div>
 
       <div class="section-label" style="margin-top:1.5rem">Pick your AI tool</div>

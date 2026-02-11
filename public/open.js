@@ -2,6 +2,7 @@
 (function () {
   let promptContent = '';
   let repoName = '';
+  let usedFallback = false;
 
   const params = new URLSearchParams(location.search);
   const promptParam = params.get('prompt');
@@ -9,14 +10,16 @@
 
   if (promptParam) {
     // Instructions encoded directly in URL (base64)
+    // Strip trailing non-base64 chars (e.g. ")" from markdown link syntax)
+    const cleaned = promptParam.replace(/[^A-Za-z0-9+/=]+$/, '');
     try {
-      promptContent = decodeURIComponent(escape(atob(promptParam)));
+      promptContent = decodeURIComponent(escape(atob(cleaned)));
       showReady();
     } catch (e) {
       showError('Invalid prompt encoding. The link may be malformed.');
     }
   } else if (repoParam) {
-    // Fetch .openwithagent.md from GitHub
+    // Fetch .openwithagent.md from GitHub, fallback to README.md
     repoName = repoParam;
     fetchFromRepo(repoParam);
   } else {
@@ -25,30 +28,52 @@
 
   async function fetchFromRepo(repo) {
     const branches = ['main', 'master'];
-    let fetched = false;
 
+    // Try .openwithagent.md first
     for (const branch of branches) {
       try {
         const url = `https://raw.githubusercontent.com/${repo}/${branch}/.openwithagent.md`;
         const res = await fetch(url);
         if (res.ok) {
           promptContent = await res.text();
-          fetched = true;
-          break;
+          showReady();
+          return;
         }
       } catch (e) {
         // try next branch
       }
     }
 
-    if (fetched) {
-      showReady();
-    } else {
-      showError(
-        `Could not find .openwithagent.md in ${repo}. ` +
-        'Make sure the file exists on the main or master branch.'
-      );
+    // Fallback: fetch README.md and wrap with setup context
+    for (const branch of branches) {
+      try {
+        const url = `https://raw.githubusercontent.com/${repo}/${branch}/README.md`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const readme = await res.text();
+          usedFallback = true;
+          promptContent =
+            `I want to set up the project "${repo}" on my machine.\n\n` +
+            `Here is the project's README:\n\n` +
+            `---\n${readme}\n---\n\n` +
+            `Based on the README above, please:\n` +
+            `1. Clone the repository: git clone https://github.com/${repo}.git\n` +
+            `2. Install all dependencies\n` +
+            `3. Run any setup or build steps mentioned\n` +
+            `4. Verify the installation works\n\n` +
+            `If the README doesn't include clear setup instructions, inspect the repo structure (package.json, Makefile, etc.) and figure out the right steps.`;
+          showReady();
+          return;
+        }
+      } catch (e) {
+        // try next branch
+      }
     }
+
+    showError(
+      `Could not find .openwithagent.md or README.md in ${repo}. ` +
+      'Make sure the repository exists and is public.'
+    );
   }
 
   function showReady() {
@@ -60,6 +85,10 @@
       document.getElementById('repo-name').textContent = repoName;
     }
 
+    if (usedFallback) {
+      document.getElementById('fallback-notice').style.display = '';
+    }
+
     document.getElementById('prompt-content').textContent = promptContent;
   }
 
@@ -67,12 +96,6 @@
     document.getElementById('status').style.display = 'none';
     document.getElementById('error-state').style.display = '';
     document.getElementById('error-detail').textContent = msg;
-  }
-
-  // Escape prompt for shell usage — wrap in heredoc to avoid escaping issues
-  function shellEscape(text) {
-    // Using heredoc with a unique delimiter avoids all escaping
-    return text;
   }
 
   function generateCommand(tool) {
